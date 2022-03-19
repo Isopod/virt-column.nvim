@@ -19,7 +19,7 @@ M.setup = function(config)
     M.namespace = vim.api.nvim_create_namespace "virt-column"
 
     vim.cmd [[command! -bang VirtColumnRefresh lua require("virt-column.commands").refresh("<bang>" == "!")]]
-    vim.cmd [[highlight link VirtColumn Whitespace]]
+    --vim.cmd [[highlight link VirtColumn Whitespace]]
     vim.cmd [[highlight clear ColorColumn]]
 
     vim.cmd [[
@@ -45,7 +45,12 @@ M.refresh = function()
     local textwidth = vim.opt.textwidth:get()
     local colorcolumn = vim.opt.colorcolumn:get()
 
+    if M.config.column then
+        colorcolumn = M.config.column
+    end
+
     for i, c in ipairs(colorcolumn) do
+        c = tostring(c)
         if vim.startswith(c, "+") then
             colorcolumn[i] = textwidth + tonumber(c:sub(2))
         elseif vim.startswith(c, "-") then
@@ -66,7 +71,7 @@ M.refresh = function()
             local line = lines[i]:gsub("\t", string.rep(" ", vim.opt.tabstop:get()))
             if width > column and vim.api.nvim_strwidth(line) < column then
                 vim.api.nvim_buf_set_extmark(bufnr, M.namespace, i - 1, 0, {
-                    virt_text = { { M.config.char, "VirtColumn" } },
+                    virt_text = { { M.config.char, "IndentBlankLineChar" } },
                     virt_text_pos = "overlay",
                     hl_mode = "combine",
                     virt_text_win_col = column - 1,
